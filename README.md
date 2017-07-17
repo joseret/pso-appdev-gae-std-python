@@ -32,6 +32,12 @@ gcloud config set project ${GOOGLE_PROJECT}
 
 ```
 
+## Step 1a - Enable Billing
+
+```
+gcloud service-management enable deploymentmanager.googleapis.com
+```
+
 
 # Step 2 - Setup Your IDE
 
@@ -48,8 +54,33 @@ touch __init__.py
 https://cloud.google.com/solutions/spinnaker-on-compute-engine
 
 ## Step 3a - Clone Spinnaker Deployment (somewhere else)
-
+```
 cd ..
 https://github.com/GoogleCloudPlatform/spinnaker-deploymentmanager.git
-cd spinakker-deploymentmanager
+cd spinnaker-deploymentmanager
+
+```
+
+## Step 3b - create spinnaker
+```
+gcloud service-management enable deploymentmanager.googleapis.com
+gcloud service-management enable appengine.googleapis.com
+gcloud service-management enable compute-component.googleapis.com
+
+export GOOGLE_PROJECT=$(gcloud config get-value project)
+export DEPLOYMENT_NAME="spinnaker-deploy"
+export JENKINS_PASSWORD=C1j0seC2!
+gcloud deployment-manager deployments create --config config.jinja ${DEPLOYMENT_NAME} --properties jenkinsPassword:${JENKINS_PASSWORD}
+```
+
+## Step 3b -
+```
+export DEPLOYMENT_NAME="spinnaker-deploy"
+export SPINNAKER_VM=$(gcloud compute instances list --regexp "${DEPLOYMENT_NAME}-spinnaker.+" --uri)
+export JENKINS_VM=$(gcloud compute instances list --regexp "${DEPLOYMENT_NAME}-jenkins.+" --uri)
+gcloud compute ssh ${SPINNAKER_VM} -- -L 8081:localhost:8081 -L 8082:$(basename $JENKINS_VM):8080
+```
+
+## Step 3c - Verify localhost:8081 for Spinnaker and localhost:8082 for Jenkins
+
 
