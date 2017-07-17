@@ -1,10 +1,12 @@
 # pso-appdev-gae-std-python
 Google PSO - AppDev - GAE - Standard - Python
 
+git clone git@github.com:joseret/pso-appdev-gae-std-python.git
+
 # Step 0 - Clone
 ```
 export PSO_GIT_USER_NAME='Jose Retelny'
-export PSO_GIT_EMAIL='joseret@google.com ''
+export PSO_GIT_EMAIL='joseret@google.com'
 git config --global user.email ${PSO_GIT_EMAIL}
 git config --global user.name ${PSO_GIT_USER_NAME}
 git remote add upstream https://github.com/joseret/pso-appdev-gae-std-python
