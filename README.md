@@ -83,4 +83,19 @@ gcloud compute ssh ${SPINNAKER_VM} -- -L 8081:localhost:8081 -L 8082:$(basename 
 
 ## Step 3c - Verify localhost:8081 for Spinnaker and localhost:8082 for Jenkins
 
+## Step 3d - Open Firewall to
+gcloud compute firewall-rules create allow-github-webhook \
+    --allow="tcp:8084" \
+    --source-ranges=$(curl -s https://api.github.com/meta | python -c "import sys, json; print ','.join(json.load(sys.stdin)['hooks'])") \
+    --target-tags="spinnaker-vm"
+
+## Step 3e - Setup Halyard
+
+Answer No to not override configuration
+```
+sudo apt-get update
+sudo apt-get upgrade spinnaker-halyard
+```
+
+
 
