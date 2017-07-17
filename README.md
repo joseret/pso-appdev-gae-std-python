@@ -91,11 +91,15 @@ gcloud compute firewall-rules create allow-github-webhook \
 
 ## Step 3e - Setup Halyard
 
-Answer No to not override configuration
 ```
-sudo apt-get update
-sudo apt-get upgrade spinnaker-halyard
+curl -O https://raw.githubusercontent.com/spinnaker/halyard/master/install/stable/InstallHalyard.sh
+
+sudo bash InstallHalyard.sh
 ```
 
+## Step 3f - Snapshot via UI (commnad below)
+```
+gcloud compute --project "pso-appdev-gae-cs1" disks snapshot "spinnaker-deploy-spinnaker-dqdp" --zone "us-west1-a" --description "spinnaker-deploy-spinnaker-dqdp-s2" --snapshot-names "spinnaker-deploy-spinnaker-dqdp-s2"
 
+```
 
