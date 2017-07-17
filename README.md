@@ -40,3 +40,16 @@ Make sure you fix gitignore
 mkdir lib
 touch __init__.py
 
+```
+
+# Step 3 - Setup Spinnaker
+
+## Reference
+https://cloud.google.com/solutions/spinnaker-on-compute-engine
+
+## Step 3a - Clone Spinnaker Deployment (somewhere else)
+
+cd ..
+https://github.com/GoogleCloudPlatform/spinnaker-deploymentmanager.git
+cd spinakker-deploymentmanager
+
