@@ -33,3 +33,10 @@ gcloud config set project ${GOOGLE_PROJECT}
 ```
 
 
+# Step 2 - Setup Your IDE
+
+Make sure you fix gitignore
+```
+mkdir lib
+touch __init__.py
+
