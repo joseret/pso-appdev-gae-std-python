@@ -22,7 +22,7 @@ https://cloud.google.com/sdk/gcloud/reference/projects/create
 ```
 gcloud auth login
 
-export GOOGLE_PROJECT='pso-appdev-gae-cs1'
+export GOOGLE_PROJECT='pso-appdev-gae-cs2'
 export GOOGLE_ORG='joecloudy.com'
 export GOOGLE_ORG_ID='553683458383'
 
@@ -35,7 +35,7 @@ gcloud config set project ${GOOGLE_PROJECT}
 ## Step 1a - Enable Billing
 
 ```
-gcloud service-management enable deploymentmanager.googleapis.com
+https://www.spinnaker.io/guides/tutorials/codelabs/appengine-source-to-prod/
 ```
 
 
@@ -103,3 +103,77 @@ gcloud compute --project "pso-appdev-gae-cs1" disks snapshot "spinnaker-deploy-s
 
 ```
 
+# New
+```
+gcloud compute firewall-rules create allow-github-webhook \
+    --allow="tcp:8084" \
+    --source-ranges=$(curl -s https://api.github.com/meta | python -c "import sys, json; print ','.join(json.load(sys.stdin)['hooks'])") \
+    --target-tags="allow-github-webhook" --project ${GOOGLE_PROJECT}
+```
+```
+gcloud compute instances create $USER-spinnaker \
+    --scopes="https://www.googleapis.com/auth/cloud-platform" \
+    --machine-type="n1-highmem-4" \
+    --image-family="ubuntu-1404-lts" \
+    --image-project="ubuntu-os-cloud" \
+    --zone="us-west1-a" \
+    --tags="allow-github-webhook"  --project ${GOOGLE_PROJECT}
+```
+```
+gcloud compute ssh joseret-spinnaker --ssh-flag="-L 9000:localhost:9000" --zone use-west1-a --project ${GOOGLE_PROJECT} --ssh-flag="-L 8084:localhost:8084"
+```
+```
+
+
+curl -O https://raw.githubusercontent.com/spinnaker/halyard/master/install/stable/InstallHalyard.sh
+
+sudo bash InstallHalyard.sh
+
+```
+
+```
+export GOOGLE_PROJECT='pso-appdev-gae-cs2'
+
+gcloud app create --region us-central --project ${GOOGLE_PROJECT}
+```
+
+```
+
+export GOOGLE_PROJECT='pso-appdev-gae-cs2'
+
+hal config version edit --version $(hal version latest -q)
+
+hal config provider appengine enable
+
+
+hal config provider appengine account add my-appengine-account --project ${GOOGLE_PROJECT}
+
+hal config storage gcs edit --project ${GOOGLE_PROJECT}
+
+hal config storage edit --type gcs
+
+mkdir  ~/.hal/default/service-settings/gate.yml
+
+echo "host: 0.0.0.0" | tee ~/.hal/default/service-settings/gate.yml
+
+
+```
+
+```
+sudo hal deploy apply
+
+
+
+```
+### Create Application
+
+```
+pso-appdev-gae-cs2
+github
+https://github.com/joseret/pso-appdev-gae-std-python
+
+
+
+
+
+```
