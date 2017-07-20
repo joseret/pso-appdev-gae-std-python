@@ -33,7 +33,7 @@ export PSO_GIT_USER_NAME='Jose Retelny'
 export PSO_GIT_EMAIL='joseret@google.com'
 git config --global user.email ${PSO_GIT_EMAIL}
 git config --global user.name ${PSO_GIT_USER_NAME}
-git remote add upstream https://github.com/joseret/pso-appdev-gae-std-python
+git remote add upstream https://github.com/joseret/pso-appdev-gae-c1
 ```
 
 # Step 1 - Create Project and Setup Spinnaker
