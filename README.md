@@ -35,18 +35,44 @@ export PSO_GIT_EMAIL='joseret@google.com'
 git config --global user.email ${PSO_GIT_EMAIL}
 git config --global user.name ${PSO_GIT_USER_NAME}
 git remote add upstream https://github.com/joseret/pso-appdev-gae-c1
+cd pso-appdev-gae-c1
 ```
 
+# Section 010 - Create Local App
+```commandline
+git checkout -b s-010-local-app
+
+```
 # Create main.py
 
 ```
-runtime: python27
-api_version: 1
-threadsafe: true
+# Copyright 2016 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-handlers:
-- url: /.*
-  script: main.app
+import webapp2
+
+
+class MainPage(webapp2.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type'] = 'text/html'
+        self.response.write('<body style=\'background-color: red\'>Hello, World!</body>')
+
+
+app = webapp2.WSGIApplication([
+    ('/', MainPage),
+], debug=True)
+
 
 ```
 
@@ -62,7 +88,24 @@ handlers:
   script: main.app
 ```
 
+# Commit changes
+```commandline
+git status
+git add .
+git commit -a -m "Section 010 - local app"
+git push origin s-010-local-app 
+```
 
+## Start Local Dev Server
+```commandline
+ dev_appserver.py app.yaml
+```
+
+## Check App
+```commandline
+http://localhost:8080
+
+```
 # Step 1 - Create Project and Setup Spinnaker
 ## Reference
 
