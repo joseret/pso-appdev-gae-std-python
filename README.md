@@ -120,6 +120,20 @@ http://localhost:8000
 ![Demo App - Admin Console - Nice!](https://storage.googleapis.com/joe-cloudy-public/pso-appdev-cloudstart-assets/s010-local-app-admin-console.png)
 
 
+### Quick Change - to main.py
+
+* Change the text in main.py
+  + Notice that python autodetects changes (most of the time does not require restart of dev_server.py)
+![Demo App - Small Change](https://storage.googleapis.com/joe-cloudy-public/pso-appdev-cloudstart-assets/S010-local-app-small-change.png)
+
+
+
+
+
+
+#TBD
+
+
 https://cloud.google.com/sdk/gcloud/reference/projects/create
 
 
