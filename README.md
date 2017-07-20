@@ -203,12 +203,36 @@ siege -c 1 -l /tmp/siege.log https://pso-appdev-gae-cs2.appspot.com
 
 
 
-# s030 - Install Spinnaker
+# s030 - Install Spinnaker - Without Trigger
 
 [Spinnaker App Engine Code Lab Instructions](https://www.spinnaker.io/guides/tutorials/codelabs/appengine-source-to-prod/)
 
 
-## Skip 
+
+## Skip creating the app, we already did it
+
+## Skip Github firewall
+
+## Create Spinnaker GCE Instance
+
+```commandline
+gcloud compute instances create $USER-spinnaker \
+    --scopes="https://www.googleapis.com/auth/cloud-platform" \
+    --machine-type="n1-highmem-4" \
+    --image-family="ubuntu-1404-lts" \
+    --image-project="ubuntu-os-cloud" \
+    --zone="us-central1-f" \
+    --tags="allow-github-webhook" --project ${GCP_PROJECT}
+```
+
+## Setup firewall rule for github
+```commandline
+gcloud compute firewall-rules create allow-github-webhook \
+    --allow="tcp:8084" \ 
+    --source-ranges=$(curl -s https://api.github.com/meta | python -c "import sys, json; print ','.join(json.load(sys.stdin)['hooks'])") \
+    --target-tags="allow-github-webhook"
+```
+
 #TBD
 
 
