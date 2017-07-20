@@ -128,17 +128,15 @@ http://localhost:8000
 
 
 
+# Setup Project if applicable
 
 
+## Create Project
 
-#TBD
-
-
-https://cloud.google.com/sdk/gcloud/reference/projects/create
+[Create Project Docs](https://cloud.google.com/sdk/gcloud/reference/projects/create)
 
 
-
-## Instructions (jr@joecloudy.com)
+### Instructions (jr@joecloudy.com)
 
 ```
 gcloud auth login
@@ -150,19 +148,76 @@ export GOOGLE_ORG_ID='553683458383'
 gcloud projects create ${GOOGLE_PROJECT} --organization=${GOOGLE_ORG_ID} --set-as-default
 
 gcloud config set project ${GOOGLE_PROJECT}
+gcloud config set compute/region us-central1
+gcloud config set compute/zone us-central1-f
 
 ```
 
-## Step 1a - Enable Billing
+## Enable Billing (if needed)
+[Enable Billing Instructions](https://support.google.com/cloud/answer/6293499#enable-billing)
+
+
+
+
+# Deploy App (S020)
+
+## Enable API's
+```commandline
+gcloud service-management enable appengine.googleapis.com
+gcloud service-management enable compute-component.googleapis.com
 
 ```
-https://www.spinnaker.io/guides/tutorials/codelabs/appengine-source-to-prod/
+
+## Deploy App
+
+```commandline
+gcloud app deploy app.yaml
 ```
+
+## Let's see in GCP
+
+[GCP Console](https://console.cloud.google.com/home/dashboard?project=pso-appdev-gae-cs2)
+
+
+
+https://pso-appdev-gae-cs2.appspot.com
+
+
+## Install siege
+
+```commandline
+sudo apt-get install siege
+```
+
+## Let's see it auto
+
+```commandline
+siege -c 1 -l /tmp/siege.log https://pso-appdev-gae-cs2.appspot.com 
+
+```
+### Siege 10 then 100
+![Concurrent 10 then Concurrent 3](https://storage.googleapis.com/joe-cloudy-public/pso-appdev-cloudstart-assets/s020-gcp-app-under-siege-10-100.png)
+
+### Back to -c 3
+![Back to Concurrent 3](https://storage.googleapis.com/joe-cloudy-public/pso-appdev-cloudstart-assets/s020-gcp-app-siege-concurrent-3.png)
+
+
+
+# s030 - Install Spinnaker
+
+[Spinnaker App Engine Code Lab Instructions](https://www.spinnaker.io/guides/tutorials/codelabs/appengine-source-to-prod/)
+
+
+## Skip 
+#TBD
+
+
+https://cloud.google.com/sdk/gcloud/reference/projects/create
 
 
 # Step 2 - Setup Your IDE
 
-Make sure you fix gitignore
+Make sure you fix .gitignore
 ```
 mkdir lib
 touch __init__.py
