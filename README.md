@@ -15,7 +15,7 @@ Google PSO - AppDev - GAE - Standard - Python
  
  * Remember your github url 
  
-![GitHub](https://github.com/joseret/pso-appdev-gae-c1)
+[https://github.com/joseret/pso-appdev-gae-c1](https://github.com/joseret/pso-appdev-gae-c1)
 
 # Login to your "development" environment
 
