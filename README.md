@@ -1,7 +1,31 @@
 # pso-appdev-gae-std-python
 Google PSO - AppDev - GAE - Standard - Python
 
-git clone git@github.com:joseret/pso-appdev-gae-std-python.git
+#  Starting requirement - This Document - README.md
+
+# Create Git Public Repository Public
+
+* Sign in to Github
+* New Repository
+ + Name / Description
+ 
+
+
+![Create git public repository](https://storage.googleapis.com/joe-cloudy-public/pso-app-dev-github-create-repository.png) 
+ 
+ * Remember your github url 
+ 
+![GitHub](https://github.com/joseret/pso-appdev-gae-c1)
+
+# Login to your "development" environment
+
+* vnc to development GCP Instance
+* create your source directory folder
+
+#  
+```
+git@github.com:joseret/pso-appdev-gae-c1.git
+```
 
 # Step 0 - Clone
 ```
