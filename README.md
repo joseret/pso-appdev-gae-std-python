@@ -109,10 +109,17 @@ http://localhost:8080
 
 ## Hope you see this
 ![Demo App - Yay!](https://storage.googleapis.com/joe-cloudy-public/pso-appdev-cloudstart-assets/S010%20-%20initial-app-running-locally.png)
-# Step 1 - Create Project and Setup Spinnaker
-## Reference
 
+
+## Additional Goodies - the Admin Console (for local app)
+```commandline
+http://localhost:8000
+```
+## Reference
+![Demo App - Admin Console - Nice!](https://storage.googleapis.com/joe-cloudy-public/pso-appdev-cloudstart-assets/s010-local-app-admin-console.png)
 https://cloud.google.com/sdk/gcloud/reference/projects/create
+
+
 
 ## Instructions (jr@joecloudy.com)
 
