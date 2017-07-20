@@ -115,8 +115,11 @@ http://localhost:8080
 ```commandline
 http://localhost:8000
 ```
-## Reference
+
+### See the Admin Console
 ![Demo App - Admin Console - Nice!](https://storage.googleapis.com/joe-cloudy-public/pso-appdev-cloudstart-assets/s010-local-app-admin-console.png)
+
+
 https://cloud.google.com/sdk/gcloud/reference/projects/create
 
 
