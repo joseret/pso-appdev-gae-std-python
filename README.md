@@ -11,7 +11,7 @@ Google PSO - AppDev - GAE - Standard - Python
  
 
 
-![Create git public repository](https://storage.googleapis.com/joe-cloudy-public/pso-app-dev-github-create-repository.png) 
+![Create git public repository](https://storage.googleapis.com/joe-cloudy-public/pso-appdev-cloudstart-assets/pso-app-dev-github-create-repository.png) 
  
  * Remember your github url 
  
