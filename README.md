@@ -216,13 +216,16 @@ siege -c 1 -l /tmp/siege.log https://pso-appdev-gae-cs2.appspot.com
 ## Create Spinnaker GCE Instance
 
 ```commandline
+echo $GOOGLE_PROJECT
+```
+```commandline
 gcloud compute instances create $USER-spinnaker \
     --scopes="https://www.googleapis.com/auth/cloud-platform" \
     --machine-type="n1-highmem-4" \
     --image-family="ubuntu-1404-lts" \
     --image-project="ubuntu-os-cloud" \
     --zone="us-central1-f" \
-    --tags="allow-github-webhook" --project ${GCP_PROJECT}
+    --tags="allow-github-webhook" --project $GOOGLE_PROJECT
 ```
 
 ## Setup firewall rule for github
