@@ -22,13 +22,13 @@ Google PSO - AppDev - GAE - Standard - Python
 * vnc to development GCP Instance
 * create your source directory folder
 
-#  
+#  Get the starting empty github repository and instructions
 ```
 git clone git@github.com:joseret/pso-appdev-gae-c1.git
 cd pso-appdev-gae-c1
 ```
 
-# Step 0 - Clone
+# Clone
 ```
 export PSO_GIT_USER_NAME='Jose Retelny'
 export PSO_GIT_EMAIL='joseret@google.com'
@@ -36,6 +36,32 @@ git config --global user.email ${PSO_GIT_EMAIL}
 git config --global user.name ${PSO_GIT_USER_NAME}
 git remote add upstream https://github.com/joseret/pso-appdev-gae-c1
 ```
+
+# Create main.py
+
+```
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: /.*
+  script: main.app
+
+```
+
+# Create app.yaml
+
+```
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: /.*
+  script: main.app
+```
+
 
 # Step 1 - Create Project and Setup Spinnaker
 ## Reference
