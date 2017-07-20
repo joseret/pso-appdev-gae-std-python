@@ -216,16 +216,16 @@ siege -c 1 -l /tmp/siege.log https://pso-appdev-gae-cs2.appspot.com
 ## Create Spinnaker GCE Instance
 
 ```commandline
-echo $GOOGLE_PROJECT
+echo PSO_CS_PROJECT
 ```
 ```commandline
-gcloud compute instances create $USER-spinnaker \
+gcloud compute instances create cicd-spinnaker \
     --scopes="https://www.googleapis.com/auth/cloud-platform" \
     --machine-type="n1-highmem-4" \
     --image-family="ubuntu-1404-lts" \
     --image-project="ubuntu-os-cloud" \
     --zone="us-central1-f" \
-    --tags="allow-github-webhook" --project $GOOGLE_PROJECT
+    --tags="allow-github-webhook" --project PSO_CS_PROJECT
 ```
 
 ## Setup firewall rule for github
@@ -234,6 +234,34 @@ gcloud compute firewall-rules create allow-github-webhook \
     --allow="tcp:8084" \ 
     --source-ranges=$(curl -s https://api.github.com/meta | python -c "import sys, json; print ','.join(json.load(sys.stdin)['hooks'])") \
     --target-tags="allow-github-webhook"
+```
+
+
+## Optional to use ssh proxy for localhost (we have a dev environment VM to in same project)
+
+```commandline
+export PSO_CS_USER=jr
+export PSO_CS_PROJECT='pso-appdev-gae-cs2'
+gcloud config set project ${PSO_CS_PROJECT}
+gcloud config set compute/region us-central1
+gcloud config set compute/zone us-central1-f
+
+gcloud config list
+
+gcloud compute ssh ${PSO_CS_USER}@cicd-spinnaker --ssh-flag="-L 9000:localhost:9000" --ssh-flag="-L 8084:localhost:8084"
+```
+
+### Terminal inside spinnaker vm
+
+![Terminal inside spinnaker vm](https://storage.googleapis.com/joe-cloudy-public/pso-appdev-cloudstart-assets/s030-login-install-spinnaker.png)
+## Install Spinnaker 
+
+```commandline
+curl -O https://raw.githubusercontent.com/spinnaker/halyard/master/install/stable/InstallHalyard.sh
+
+sudo bash InstallHalyard.sh
+
+
 ```
 
 #TBD
