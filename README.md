@@ -106,6 +106,9 @@ git push origin s-010-local-app
 http://localhost:8080
 
 ```
+
+## Hope you see this
+![Demo App - Yay!](https://storage.googleapis.com/joe-cloudy-public/pso-appdev-cloudstart-assets/S010%20-%20initial-app-running-locally.png)
 # Step 1 - Create Project and Setup Spinnaker
 ## Reference
 
