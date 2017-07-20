@@ -24,7 +24,7 @@ Google PSO - AppDev - GAE - Standard - Python
 
 #  
 ```
-git@github.com:joseret/pso-appdev-gae-c1.git
+git clone git@github.com:joseret/pso-appdev-gae-c1.git
 ```
 
 # Step 0 - Clone
