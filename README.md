@@ -28,6 +28,7 @@ git clone git@github.com:joseret/pso-appdev-gae-c1.git
 cd pso-appdev-gae-c1
 ```
 
+
 # Clone
 ```
 export PSO_GIT_USER_NAME='Jose Retelny'
@@ -43,6 +44,13 @@ cd pso-appdev-gae-c1
 git checkout -b s-010-local-app
 
 ```
+## Install python packages
+```
+pip install -r requirements.txt -t lib
+```
+## Remove lib from .gitignore
+
+
 # Create main.py
 
 ```
@@ -664,17 +672,6 @@ FriendlyChat.prototype.onAuthStateChanged = function(user) {
 
 # S080 - Let's add python libraries for google (and two handlers)
 
-## Add requirements.txt (with google python api client)
-```
-google-api-python-client
-```
-
-## Run pip install (for local directory from requirements.txt)
-*  You will run this command when you make changes to the requirements.txt
-* check .gitignore to make sure lib is not commented out
-```
-pip install -t lib -r requirements.txt
-``` 
 
 ## Add appengine_config.py (for external libraries inclusion)
 
@@ -718,4 +715,52 @@ vendor.add('lib')
 *  Update how ID Tokens gets refreshed in web 
 [Firebase - retrieve and verify token](https://firebase.google.com/docs/auth/admin/verify-id-tokens)
 
+
+
+## 
+
+* Follow tutorial (https://cloud.google.com/appengine/docs/standard/python/authenticating-users-firebase-appengine#verifying_tokens_on_the_server)
+
+* Use the sample code of a sample app but trigger it appropriately to make restful call in the app
+  +  Click the Enter Button
+
+```
+// Fetch notes from the backend.
+function fetchNotes() {
+  $.ajax(backendHostUrl + '/notes', {
+    /* Set header for the XMLHttpRequest to get data from the web server
+    associated with userIdToken */
+    headers: {
+      'Authorization': 'Bearer ' + userIdToken
+    }
+  })
+```
+
+* Reponse in console.log on "success"
+```
+JSON-Success Object {path: "/rest/customer"}
+```
+
+* Add this to your app.yaml (and fix the name of the common firebase)
+```
+libraries:
+- name: ssl
+  version: latest
+
+env_variables:
+    FIREBASE_PROJECT_ID: 'pso-appdev-cs-1'
+
+```
+mkdir localonly
+add to .gitignore
+```
+*  Add appropriate capture of credentials Sample
+```
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import auth as firebase_auth
+
+cred = credentials.Certificate('path/to/serviceAccountKey.json')
+default_app = firebase_admin.initialize_app(cred)
+```
 
