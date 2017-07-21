@@ -264,6 +264,140 @@ sudo bash InstallHalyard.sh
 
 ```
 
+### Configure Spinnaker for App Egine
+
+```commandline
+export PSO_CS_USER=jr
+export PSO_CS_PROJECT='pso-appdev-gae-cs2'
+hal config version edit --version $(hal version latest -q)
+
+hal config provider appengine enable
+
+hal config provider appengine account add my-appengine-account --project $PSO_CS_PROJECT
+
+hal config storage gcs edit --project $PSO_CS_PROJECT
+
+hal config storage edit --type gcs
+
+mkdir -p ~/.hal/default/service-settings
+echo "host: 0.0.0.0" | tee ~/.hal/default/service-settings/gate.yml
+
+```
+
+### Finalize Spinnaker Installation
+
+```commandline
+sudo hal deploy apply
+```
+
+
+### Goto Spinnaker App (use machine ip, or instance-name or localhost for ssh proxy)
+```commandline
+http://localhost:9000 
+```
+
+## Configure App Engine Application in Spinnaker
+
+* [Follow insturctions](https://www.spinnaker.io/guides/tutorials/codelabs/appengine-source-to-prod/#deploy-to-app-engine)
+
+
+### Create Application (Under Actions)
+
+* Name (psocs)
+* Email (devops email)
+* Repo Type (github)
+* Repo Project (https://github.com/joseret/pso-appdev-gae-c1)
+* Repo Project (pso-appdev-gae-c1)
+* Description 
+
+Press Create!
+
+### Create Server Group 
+
+* Stack (default)
+* Git Repoistory URL (https://github.com/joseret/pso-appdev-gae-c1.git)
+* Git Credential Type (No Credentials)
+* Branch (release)
+
+* Config Files
+  + Config Filepaths (app.yaml)
+  
+  
+  
+## Create Deployment Pipeline 
+* [Follow Instructions](https://www.spinnaker.io/guides/tutorials/codelabs/appengine-source-to-prod/#deployment-pipeline)
+
+### Create Pipeline
+
+* Pipeline Name (Deploy And Promote)
+
+### (Skip Webhook) - Deploy Stage
+* [Follow Instructions](https://www.spinnaker.io/guides/tutorials/codelabs/appengine-source-to-prod/#deploy-stage)
+
+  + Add Server Group
+
+### Add Stage (Edit Load Balancer)
+
+
+
+#  Add Stage (Manual Judgement)
+
+https://www.spinnaker.io/guides/tutorials/codelabs/appengine-source-to-prod/#manual-judgment-stage
+
+### Add Stage - Enable Server Group
+
+https://www.spinnaker.io/guides/tutorials/codelabs/appengine-source-to-prod/#enable-stage
+
+### Add Stage (Wait)
+
+https://www.spinnaker.io/guides/tutorials/codelabs/appengine-source-to-prod/#wait-stage
+
+
+### Add Stage (Destroy)
+
+https://www.spinnaker.io/guides/tutorials/codelabs/appengine-source-to-prod/#destroy-stage
+
+
+
+### Run Manually
+
+* Remove the manually deployed one
+
+# S040 - Webhook
+
+```commandline
+gcloud compute firewall-rules create allow-github-webhook \
+    --allow="tcp:8084" \
+    --source-ranges=$(curl -s https://api.github.com/meta | python -c "import sys, json; print ','.join(json.load(sys.stdin)['hooks'])") \
+    --target-tags="spinnaker-vm"
+```
+
+## Goto Network to check
+
+
+## Configure Automatic Trigger
+
+* [Follow Instreuctions](https://www.spinnaker.io/guides/tutorials/codelabs/appengine-source-to-prod/#webhook-trigger)
+
+![Webhook Trigger](https://storage.googleapis.com/joe-cloudy-public/pso-appdev-cloudstart-assets/s040-config-webhook-automated-trigger.png)
+
+
+### Find cicd-simmaker instance external ip
+
+
+### Trigger Release
+
+
+
+```
+git checkout release
+git merge s040-webhook
+git push
+```
+
+### If it works
+
+![You should se this](https://storage.googleapis.com/joe-cloudy-public/pso-appdev-cloudstart-assets/s040-config-webhook-github.png)
 #TBD
 
 
