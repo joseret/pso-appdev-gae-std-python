@@ -401,7 +401,7 @@ git push
 
 
 
-# S050 - Setup Firebase
+# S050 - Setup Firebase (starter spa)
 
 ### Go to Firebase console, make sure you are logged in class environment
 
@@ -430,6 +430,52 @@ Look at s050 - branch
 
 What Next? 
 
+
+# S060 - Setup Firebase Auth
+
+## Setup Signin Method (https://firebase.corp.google.com/project/pso-appdev-cs-1/authentication/users)
+
+![Setup Signin Methods](https://storage.googleapis.com/joe-cloudy-public/pso-appdev-cloudstart-assets/s060-fb-auth-setup-signin.png)
+
+## Goto Get Started
+
+### Set Email/Password
+
+Let's use 
+[Firebase UI Projects For Web](https://github.com/firebase/FirebaseUI-Web)
+
+### Insert the Code (localized widtet)
+
+[Languages]()https://github.com/firebase/firebaseui-web/blob/master/LANGUAGES.md)
+
+```
+<script src="https://www.gstatic.com/firebasejs/ui/2.3.0/firebase-ui-auth__{LANGUAGE_CODE}.js"></script>
+<link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/2.3.0/firebase-ui-auth.css" />
+
+```
+
+## Create a widget.html (that will be the popup)
+
+* Same header includes for firebase from before (with this body)
+```
+  <body>
+    <div id="firebaseui-auth-container"></div>
+  </body>
+```
+
+* Create widget.html (as login screen)
+  +  (Hint-use the index.html styling as much as possible)
+
+![Something Like This](https://storage.googleapis.com/joe-cloudy-public/pso-appdev-cloudstart-assets/s060-get-ready-for-auth.png)  
+
+* Popup widget.html
+
+```
+FriendlyChat.prototype.signInWithPopup = function() {
+  window.open(this.getWidgetUrl(), 'Sign In', 'width=985,height=735');
+};
+
+```
 
 ###  Add Firebase to you web app
 
