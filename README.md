@@ -433,6 +433,23 @@ What Next?
 
 # S060 - Setup Firebase Auth
 
+###  Add Firebase to you web app
+
+```javascript
+<script src="https://www.gstatic.com/firebasejs/4.1.3/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyDQvUHhUTfQnioCjKf7lnr3kM_g2K8dz-8",
+    authDomain: "pso-appdev-cs-1.firebaseapp.com",
+    databaseURL: "https://pso-appdev-cs-1.firebaseio.com",
+    projectId: "pso-appdev-cs-1",
+    storageBucket: "pso-appdev-cs-1.appspot.com",
+    messagingSenderId: "159748236642"
+  };
+  firebase.initializeApp(config);
+</script>
+
 ## Setup Signin Method (https://firebase.corp.google.com/project/pso-appdev-cs-1/authentication/users)
 
 ![Setup Signin Methods](https://storage.googleapis.com/joe-cloudy-public/pso-appdev-cloudstart-assets/s060-fb-auth-setup-signin.png)
@@ -470,29 +487,31 @@ Let's use
 
 * Popup widget.html
 
+  + Enable Signin FriendlyChat "constructor"
 ```
+  this.signInButton = document.getElementById('sign-in');
+  this.signInButton.addEventListener('click', this.signInWithPopup.bind(this));
+  
+```
+
+  + Popup Code
+```
+
+/**
+ * @return {string} The URL of the FirebaseUI standalone widget.
+ */
+FriendlyChat.prototype.getWidgetUrl = function()  {
+  return '/static/widget.html';
+};
+
+
 FriendlyChat.prototype.signInWithPopup = function() {
   window.open(this.getWidgetUrl(), 'Sign In', 'width=985,height=735');
 };
 
 ```
+  + Show Signin Button
 
-###  Add Firebase to you web app
-
-```javascript
-<script src="https://www.gstatic.com/firebasejs/4.1.3/firebase.js"></script>
-<script>
-  // Initialize Firebase
-  var config = {
-    apiKey: "AIzaSyDQvUHhUTfQnioCjKf7lnr3kM_g2K8dz-8",
-    authDomain: "pso-appdev-cs-1.firebaseapp.com",
-    databaseURL: "https://pso-appdev-cs-1.firebaseio.com",
-    projectId: "pso-appdev-cs-1",
-    storageBucket: "pso-appdev-cs-1.appspot.com",
-    messagingSenderId: "159748236642"
-  };
-  firebase.initializeApp(config);
-</script>
 ```
 
 #TBD
