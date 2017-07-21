@@ -414,12 +414,22 @@ git push
 
 ### Setup Basic SPA based on [Firebase Friendly Chat](https://github.com/firebase/friendlychat-web/tree/master/web-start)
 
-Look at s050 - brank
+Look at s050 - branch
 
 ### Pop Quiz, look at images
 1. Why does http://localhost:8080/images/profile_placeholder.png work?
 2. Let's change root to go to /static/index.html
 3. Let's the python gae backend to respond to /app
+
+### Trigger release
+
+### Validate (static)
+* Check Canary
+* Check Console
+* Check Network
+
+What Next? 
+
 
 ###  Add Firebase to you web app
 
