@@ -398,6 +398,47 @@ git push
 ### If it works
 
 ![You should se this](https://storage.googleapis.com/joe-cloudy-public/pso-appdev-cloudstart-assets/s040-config-webhook-github.png)
+
+
+
+# S050 - Setup Firebase
+
+### Go to Firebase console, make sure you are logged in class environment
+
+[Firebase console](https://console.firebase.google.com/?pli=1)
+
+
+### Import Google Project
+
+* Select Pay as You Go
+
+### Setup Basic SPA based on [Firebase Friendly Chat](https://github.com/firebase/friendlychat-web/tree/master/web-start)
+
+Look at s050 - brank
+
+### Pop Quiz, look at images
+1. Why does http://localhost:8080/images/profile_placeholder.png work?
+2. Let's change root to go to /static/index.html
+3. Let's the python gae backend to respond to /app
+
+###  Add Firebase to you web app
+
+```javascript
+<script src="https://www.gstatic.com/firebasejs/4.1.3/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyDQvUHhUTfQnioCjKf7lnr3kM_g2K8dz-8",
+    authDomain: "pso-appdev-cs-1.firebaseapp.com",
+    databaseURL: "https://pso-appdev-cs-1.firebaseio.com",
+    projectId: "pso-appdev-cs-1",
+    storageBucket: "pso-appdev-cs-1.appspot.com",
+    messagingSenderId: "159748236642"
+  };
+  firebase.initializeApp(config);
+</script>
+```
+
 #TBD
 
 
