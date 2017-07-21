@@ -651,6 +651,73 @@ FriendlyChat.prototype.onAuthStateChanged = function(user) {
     ui.start('#firebaseui-auth-container', uiConfig);
   </script>
 ```
+
+## Test Canary using Version Directly and Try to Login
+
+* You get error because domain is not added in firebase auth domain. why?
+
+![Domains allowed for oauth authentication](https://storage.googleapis.com/joe-cloudy-public/pso-appdev-cloudstart-assets/s070-authentication-domain.png)
+
+## Important - I have introduced this a a bug. Will follow up.  right now open it only when testing.
+
+
+
+# S080 - Let's add python libraries for google (and two handlers)
+
+## Add requirements.txt (with google python api client)
+```
+google-api-python-client
+```
+
+## Run pip install (for local directory from requirements.txt)
+*  You will run this command when you make changes to the requirements.txt
+* check .gitignore to make sure lib is not commented out
+```
+pip install -t lib -r requirements.txt
+``` 
+
+## Add appengine_config.py (for external libraries inclusion)
+
+```
+# Copyright 2016 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+from google.appengine.ext import vendor
+
+# Add any libraries installed in the "lib" folder.
+vendor.add('lib')
+
+
+```
+
+## Add handlers
+* just return the full path requested on get and post
+* remember mime type
+
+## Add Private Section Handler
+* /private
+
+## Add Rest Handler
+* /rest
+
+
+# S090 - Validate and Sync User
+*  /rest/customer
+*  /private/info
+*  Update how ID Tokens gets refreshed in web 
+[Firebase - retrieve and verify token](https://firebase.google.com/docs/auth/admin/verify-id-tokens)
+
 #TBD
 
 
