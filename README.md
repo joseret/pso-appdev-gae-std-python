@@ -449,6 +449,8 @@ What Next?
   };
   firebase.initializeApp(config);
 </script>
+```
+
 
 ## Setup Signin Method (https://firebase.corp.google.com/project/pso-appdev-cs-1/authentication/users)
 
@@ -510,9 +512,17 @@ FriendlyChat.prototype.signInWithPopup = function() {
 };
 
 ```
-  + Show Signin Button
+  + Show Signin Button (add the line inside initFirebase)
 
 ```
+FriendlyChat.prototype.initFirebase = function() {
+  // TODO(DEVELOPER): Initialize Firebase.
+  this.signInButton.removeAttribute('hidden');
+};
+
+```
+
+
 
 #TBD
 
