@@ -753,8 +753,10 @@ env_variables:
 ```
 mkdir localonly
 add to .gitignore
+
 ```
 *  Add appropriate capture of credentials Sample
+* Copy FirebaseAdmin json key to localonly and lib
 ```
 import firebase_admin
 from firebase_admin import credentials
@@ -762,5 +764,453 @@ from firebase_admin import auth as firebase_auth
 
 cred = credentials.Certificate('path/to/serviceAccountKey.json')
 default_app = firebase_admin.initialize_app(cred)
+```
+* Here is the diff - since there are nuances
+```
+--- a/main.py
++++ b/main.py
+@@ -13,20 +13,110 @@
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ 
++import os
++import sys
++
++import json
++import logging
++import requests
+ import webapp2
+ from urlparse import urlparse
+ 
++import google
++if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
++  # Production, no need to alter anything
++  pass
++else:
++  # Local development server
++  google.__path__.pop(0)  # remove /home/<username>/.local/lib/python2.7/site-packages/google
++  # logging.warning(google.__path__)  # to inspect the final __path__ of module google
++
++google.__path__.append('./lib/google')
++import google.oauth2.id_token
++import google.auth.transport.requests
++
++import requests_toolbelt.adapters.appengine
++requests_toolbelt.adapters.appengine.monkeypatch()
++HTTP_REQUEST = google.auth.transport.requests.Request()
++
++import firebase_admin
++from firebase_admin import credentials
++from firebase_admin import auth as firebase_auth
++
++
++if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
++  cred = credentials.Certificate('lib/pso-appdev-cs-1-2a4c1ef76af6.json')
++  # Production, no need to alter anything
++  try:
++    default_app = firebase_admin.get_app()
++  except:
++    default_app = firebase_admin.initialize_app()
++else:
++  # Local development server
++  cred = credentials.Certificate('localonly/pso-appdev-cs-1-2a4c1ef76af6.json')
++  try:
++    default_app = firebase_admin.get_app()
++  except:
++    default_app = firebase_admin.initialize_app(cred)
++
++def getHeader(key, headers):
++  print 'getAuthHeader', headers.items()
++  try:
++      for header in headers.items():
++          print 'header', header, len(header)
++          if len(header) > 1:
++            if header[0] == key:
++              return header[1]
++      print 'getAuthHeader', None
++  except:
++      return None
++  return None
++
++
++def getAuthInfo(request):
++  value = getHeader('Authorization', request.headers)
++  if value and len(value.split(' ')) > 1:
++    id_token = value.split(' ').pop()
++    if (id_token != 'undefined'):
++      claims = google.oauth2.id_token.verify_firebase_token(id_token, HTTP_REQUEST)
++      if not claims:
++         return {'auth': False, 'info': id_token, 'step': 'claims'}
++
++      decoded_token = firebase_auth.verify_id_token(id_token)
++      if not decoded_token:
++        return {'auth': False, 'info': id_token, 'step': 'firebase_decoded'}
++
++      return { 'auth' : True, 'info': decoded_token, 'step': 'success'}
++    return { 'auth' : False, 'info': None}
++  else:
++    return { 'auth' : False, 'info': None}
++
++def getClaimsFromToken(request, response):
++  result = getAuthInfo(request)
++  if (not type(result) is dict) or  (not 'auth' in result):
++    logging.error("Auth Check not returning appropriate dict - key = auth")
++    response.status = '500 - Unexpected Error'
++    return None
++  if not result['auth']:
++    logging.warning("Auth Check for token failed - [{0}]", result)
++    response.status = '401 - Unauthorized Error'
++    return None
++  return result
+ 
+ class RestHandler(webapp2.RequestHandler):
+   def get(self):
++    if not getClaimsFromToken(self.request, self.response):
++      return
+     parsedUrl = urlparse(self.request.url)
+     self.response.headers['Content-Type'] = 'application/json'
+     self.response.write(parsedUrl.path)
+ 
+   def post(self):
++    if not getClaimsFromToken(self.request, self.response):
++      return
++
+     parsedUrl = urlparse(self.request.url)
+     self.response.headers['Content-Type'] = 'application/json'
+-    self.response.write(parsedUrl.path)
++    self.response.write(json.dumps({'path': parsedUrl.path}))
+```
+
+
+# S100 - Save/View Policies per User UI with Service Stups
+
+
+## Policy has policy_id, nickname, owner (user)
+* RESTful interface
+* Upsert
+* /rest/policy
+  { 'policy_id': '', 'nickname': '', 'owner':  '' }
+* returns 200 or 500
+
+## Create ProcessService in services folder
+
+* signatures
+```
+  def __init__(self, service_version):
+    self.__service_version = service_version
+
+  
+  def update_policy(self, policy_info):
+  
+  def get_policies(self, user_id):
+```
+
+* look at the diff between s100 and s090 for UI
+index.html, main.js
+ 
+
+```
+diff --git a/lib/__init__.py b/lib/__init__.py
+new file mode 100644
+index 0000000..e69de29
+diff --git a/main.py b/main.py
+index 3ddbbed..faac866 100644
+--- a/main.py
++++ b/main.py
+@@ -22,6 +22,8 @@ import requests
+ import webapp2
+ from urlparse import urlparse
+ 
++from services.processing_service import ProcessingService
++
+ import google
+ if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
+   # Production, no need to alter anything
+@@ -46,10 +48,11 @@ from firebase_admin import auth as firebase_auth
+ 
+ if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
+   # Production, no need to alter anything
++  cred = credentials.Certificate('services/pso-appdev-cs-1-2a4c1ef76af6.json')
+   try:
+     default_app = firebase_admin.get_app()
+   except:
+-    default_app = firebase_admin.initialize_app()
++    default_app = firebase_admin.initialize_app(cred)
+ else:
+   # Local development server
+   cred = credentials.Certificate('localonly/pso-appdev-cs-1-2a4c1ef76af6.json')
+@@ -104,19 +107,57 @@ def getClaimsFromToken(request, response):
+ 
+ class RestHandler(webapp2.RequestHandler):
+   def get(self):
+-    if not getClaimsFromToken(self.request, self.response):
+-      return
+-    parsedUrl = urlparse(self.request.url)
++    try:
++      if not getClaimsFromToken(self.request, self.response):
++        return
++      parsedUrl = urlparse(self.request.url)
++      ps = ProcessingService('V1.0.0')
++      if parsedUrl.path == '/rest/policy':
++        result =  ps.get_policies("jose")
++        if (type(result) == dict and
++              'success' in result):
++
++          if result['success']:
++            self.response.headers['Content-Type'] = 'text/json'
++            self.response.status = result['status']
++            self.response.write(json.dumps(result['payload']))
++          else:
++            self.response.headers['Content-Type'] = 'text/json'
++            self.response.status = result['status']
++          return
++    except Exception as e:
++      logging.error(e)
++
+     self.response.headers['Content-Type'] = 'application/json'
+-    self.response.write(parsedUrl.path)
++    self.response.status = '500 - Unexpected Error'
+ 
+   def post(self):
+-    if not getClaimsFromToken(self.request, self.response):
+-      return
++    try:
++      if not getClaimsFromToken(self.request, self.response):
++        return
++
++      parsedUrl = urlparse(self.request.url)
++
++      json_data = json.loads(self.request.body)
++      ps = ProcessingService('V1.0.0')
++      if parsedUrl.path == '/rest/policy':
++        result =  ps.update_policy("jose", json_data)
++        if (type(result) == dict and
++              'success' in result):
++
++          if result['success']:
++            self.response.headers['Content-Type'] = 'text/json'
++            self.response.status = result['status']
++            self.response.write(json.dumps(result['payload']))
++          else:
++            self.response.headers['Content-Type'] = 'text/json'
++            self.response.status = result['status']
++          return
++    except Exception as e:
++      logging.error(e)
+ 
+-    parsedUrl = urlparse(self.request.url)
+     self.response.headers['Content-Type'] = 'application/json'
+-    self.response.write(json.dumps({'path': parsedUrl.path}))
++    self.response.status = '500 - Unexpected Error'
+ 
+ 
+ class PrivatePageHandler(webapp2.RequestHandler):
+diff --git a/services/__init__.py b/services/__init__.py
+new file mode 100644
+index 0000000..e69de29
+diff --git a/services/processing_service.py b/services/processing_service.py
+new file mode 100644
+index 0000000..1a6106f
+--- /dev/null
++++ b/services/processing_service.py
+@@ -0,0 +1,58 @@
++import os
++import logging
++import time
++import datetime
++import random
++from google.appengine.ext import ndb
++
++def service_helper(success, status, payload):
++  logical_success = False
++  if success:
++    logical_success = True
++  return {
++    'success': logical_success,
++    'status': str(status),
++    'payload': payload
++  }
++
++class ProcessingService(object):
++
++  def __init__(self, service_version):
++    self.__service_version = str(service_version)
++
++  def update_policy(self, user_id, policy_info):
++    policy_info['owner'] = user_id
++    return service_helper(True, "201", {
++            'policy_id': '1',
++            'nickname': 'nick1',
++            'owner': user_id
++          })
++
++
++  def get_policies(self, user_id):
++    if (random.randint(1, 10) >= 4):
++      return service_helper( True, 200, {
++        'version': self.__service_version,
++        'list': [
++          {
++            'policy_id': '1',
++            'nickname': 'nick1',
++            'owner': user_id
++          },
++          {
++            'policy_id': '2',
++            'nickname': 'nick2',
++            'owner': user_id
++          },
++          {
++            'policy_id': '3',
++            'nickname': 'nick3',
++            'owner': user_id
++          },
++        ]
++      })
++    else:
++      return service_helper( True, 200, {
++        'version': self.__service_version,
++        'list': []
++      })
+diff --git a/services/pso-appdev-cs-1-2a4c1ef76af6.json b/services/pso-appdev-cs-1-2a4c1ef76af6.json
+new file mode 100644
+index 0000000..ecf15c9
+--- /dev/null
++++ b/services/pso-appdev-cs-1-2a4c1ef76af6.json
+@@ -0,0 +1,12 @@
++{
++  "type": "service_account",
++  "project_id": "pso-appdev-cs-1",
++  "private_key_id": "2a4c1ef76af6475e57093ffcd9564071855514e9",
++  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCYvfZ6x1YmAWV5\nOM2RLrHLqoxlDIjG+4+MQVZSI/3Hd+zmbUq9ke00w9J59ESO0BBjsxyeb1CbD7HA\n0S7VyjuI0nCgppW5aPO+B6tlmVSGi4w8iRfX1TwJWsedK01FEESWGWOSLzkmiP6m\nHawXfh8G/vVqpzuTpGgp2pPlG782vESB13hby6eYXG05rgPa1DRNexsKnD4G9SII\nWWL5r9KMANs9ILqXrLMSyHplibFDRzKpylIqjHxyzFA6MkQcYW2aETWVKRvHclE6\nPk7bmZk1bToycTkPXd0hQ/ftVIHZ+JMSwgMo5fVc4XiCF97A7sbs0yRD+GVvg6Qd\nENmCeKuhAgMBAAECggEAQ/3Dm1HielaCyhxL/YWQpX2Ms2qJ9DGE68Ul3LiivkkX\nDle2Pn6X3bYRmjHu1retpAPWCHy6n9uzn4Y+V/KG39f1RL4Cxh7+6SdW14oSgzXZ\nPhU0pOIJsIxVcRQWeFjOfxZcKXWV9h5jZKSut2JwA1g4/LnmnklACOmAjir0yjMB\nlscCHHkIzMSObuUYlTs1h+VAwgZioy3kAeS99br9ReEByIKHalML1TFDBU1Eh4wO\nBtP1wy1ZsAYtemvnwV9CAwxGpJaeNTJFckksa9Md3TiEdxLZ80MljrK8lFM1GHjl\n6AXpmBsAy5knioIUT/kZO19ERIUajp3m1hXA+KPqVQKBgQDWezUeG/W51boTAGO5\nprMX0NJyXDE+KuNEmfuHDj7xU4JORtFX3h9sUY5GgAN8FFxugNg8FKYJHCrzuVRo\n45QNUGEq3eiO6UFuqL6FT9mvyvYwegZqCSauL+IeyN7pKYY+2/MdOQZh4qRPRT8o\n8afXYf3l7mUbXTE345t1osbPpwKBgQC2Tze8AFP3EFO3PMKzEJmopyRC3Bv/u1nf\neAfGeAeKsq/jUtDfqv1ccfE3moLQLpHXe+pnGyoS3nIjK2R3iGJ/x4xhyy/sSGA7\nBtGTN+pDiNvrvS3tBpwOahm/mN+futPoAeCnYw+GXKzylqWYlDLWr8x2b62tAYxn\n0cPiVs1TdwKBgEnGobPUrEabFOFaXfNLOwlzJCCAQ9P9jqVXTiTbqpz6O7VPOM0/\ns5Ff0E/B0vEIU+8S1M59z8sMbF3fnwBhX9jgkDvdjxQxefdlhft3RwroBp0QLEqn\nES4TfHVYZQzQ4sOWht7DccWT3y8BQ8OCtFgq9dn0kcTC3p455YymTDq7AoGAQmBD\nRZLE/14VbNCVfsabe3knTaSAGTLoPOGhyxPmgwwd1+FOJTFHP8JIddsup4ddGByI\nsnOEdQxCeCWTVaX1XtqTdQOadie/yZ3o7fXcuCv7DjB5qSPP67ubllOdj7Vg88bD\nOY5ql5vkaAqLTise+2VURwbQL/4xVZdc/2plJW8CgYBCLvIrpuKyRR9Aug86oBiI\nxgD0nxJCrcUqFs4lvRcOCyaMwrh34FVni5Kry5m6G8t7uPA3z3uBSQ7m0Z08YGSC\nZ4hYkWQ+N2Gay4RskWc3nG600JSUscjstepLe1NsYmS7m6gjV0GgSDyuhd7/YK1T\n9OHTlYjRJRU94QIwbEGWYQ==\n-----END PRIVATE KEY-----\n",
++  "client_email": "firebase-adminsdk-fziu6@pso-appdev-cs-1.iam.gserviceaccount.com",
++  "client_id": "112021077141642459302",
++  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
++  "token_uri": "https://accounts.google.com/o/oauth2/token",
++  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
++  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fziu6%40pso-appdev-cs-1.iam.gserviceaccount.com"
++}
+diff --git a/static/index.html b/static/index.html
+index e251a74..a9dc5e8 100644
+--- a/static/index.html
++++ b/static/index.html
+@@ -63,7 +63,7 @@
+       apiKey: "AIzaSyDQvUHhUTfQnioCjKf7lnr3kM_g2K8dz-8",
+       authDomain: "pso-appdev-cs-1.firebaseapp.com",
+       databaseURL: "https://pso-appdev-cs-1.firebaseio.com",
+-      projectId: "pso-appdev-cs-1",
++      // projectId: "pso-appdev-cs-1",
+       storageBucket: "pso-appdev-cs-1.appspot.com",
+       messagingSenderId: "159748236642"
+     };
+@@ -118,15 +118,19 @@
+               Entrar
+             </button>
+           </form>
++
+         </div>
+-      </div>
+ 
+-      <div id="must-signin-snackbar" class="mdl-js-snackbar mdl-snackbar">
+-        <div class="mdl-snackbar__text"></div>
+-        <button class="mdl-snackbar__action" type="button"></button>
++        <div id="snackbar" class="mdl-js-snackbar mdl-snackbar" style="position: relative;">
++            <div id="snackbar-text" class="mdl-snackbar__text" style="position: relative;"></div>
++            <button class="mdl-snackbar__action" type="button"></button>
++        </div>
++          <div id="messages-bottom"   class="mdl-snackbar__text"  style="color: #000; display:hidden; text-align: center">
++          </div>
+       </div>
+ 
+     </div>
++
+   </main>
+ </div>
+ 
+diff --git a/static/scripts/main.js b/static/scripts/main.js
+index e325b02..31ef864 100644
+--- a/static/scripts/main.js
++++ b/static/scripts/main.js
+@@ -110,14 +110,56 @@ FriendlyChat.prototype.getWidgetUrl = function()  {
+ // Signs-out of Friendly Chat.
+ FriendlyChat.prototype.signOut = function() {
+   // Sign out of Firebase.
++  console.log('signOut');
++
+   this.auth.signOut();
++  this.userIdToken = "";
+ };
+ 
++FriendlyChat.prototype.getInfo = function() {
++  var self = this;
++  var userIdToken = this.userIdToken;
++  $.ajax('/rest/policy', {
++  /* Set header for the XMLHttpRequest to get data from the web server
++  associated with userIdToken */
++    headers: {
++      'Authorization': 'Bearer ' + userIdToken
++    },
++    'data': JSON.stringify({'prop': 'value'}),
++    'type': 'get',
++    'dataType': 'json',
++    'success': function(json_data) {
++      console.log('JSON-Success', json_data)
++      if ( json_data['list'] && json_data['list'].length > 0 ) {
++        console.log('list', json_data['list']);
++        $("#messages").empty();
++        for(var o in json_data['list']) {
++          console.log('list_entry', o);
++          var innerInfo = $('<div  style="padding-bottom: 10px"  />');
++          innerInfo.append( $('<span style="padding-right: 10px" />').text('Numero'));
++          innerInfo.append( $('<span style="padding-right: 10px" />').text(json_data['list'][o]['policy_id']));
++          $("#messages").append(innerInfo);
++          var innerInfo = $('<div  style="padding-bottom: 10px"  />');
++          innerInfo.append( $('<span style="padding-right: 10px" />').text('Nombre'));
++          innerInfo.append( $('<span style="padding-right: 10px" />').text(json_data['list'][o]['nickname']));
++          $("#messages").append(innerInfo);
++        }
++      } else {
++        $("#messages").empty();
++        $("#messages").append($('<div  style="padding-bottom: 10px"  />').text("Ninguna Poliza"));
++      }
++    },
++    'error': function(error) {
++        console.error('submitButtonAction error in post', error);
++    },
++  });
++}
+ 
+ FriendlyChat.prototype.submitButtonAction = function() {
+     var userIdToken = this.userIdToken;
+     console.log('submitButtonAction', userIdToken);
+-    $.ajax('/rest/customer', {
++    var self = this;
++    $.ajax('/rest/policy', {
+     /* Set header for the XMLHttpRequest to get data from the web server
+     associated with userIdToken */
+     headers: {
+@@ -128,6 +170,9 @@ FriendlyChat.prototype.submitButtonAction = function() {
+     'dataType': 'json',
+     'success': function(json_data) {
+       console.log('JSON-Success', json_data)
++      $('#messages-bottom').text("Actualizado")
++        .css("display","block").fadeOut(2000);
++      self.getInfo();
+     },
+     'error': function(error) {
+         console.error('submitButtonAction error in post', error);
+diff --git a/static/widget.html b/static/widget.html
+index 930e283..4405714 100644
+--- a/static/widget.html
++++ b/static/widget.html
+@@ -54,7 +54,7 @@
+         apiKey: "AIzaSyDQvUHhUTfQnioCjKf7lnr3kM_g2K8dz-8",
+         authDomain: "pso-appdev-cs-1.firebaseapp.com",
+         databaseURL: "https://pso-appdev-cs-1.firebaseio.com",
+-        projectId: "pso-appdev-cs-1",
++        // projectId: "pso-appdev-cs-1",
+         storageBucket: "pso-appdev-cs-1.appspot.com",
+         messagingSenderId: "159748236642"
+       };
 ```
 
